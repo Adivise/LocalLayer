@@ -27,7 +27,8 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Debug GH_TOKEN
+      - name: Debug GH_TOKEN (Linux/macOS)
+        if: matrix.os != 'windows-latest'
         run: |
           if [ -z "$GH_TOKEN" ]; then
             echo "GH_TOKEN is NOT set!"
@@ -35,6 +36,18 @@ jobs:
           else
             echo "GH_TOKEN is set correctly."
           fi
+        shell: bash
+
+      - name: Debug GH_TOKEN (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          if (-not $env:GH_TOKEN) {
+            Write-Host "GH_TOKEN is NOT set!"
+            exit 1
+          } else {
+            Write-Host "GH_TOKEN is set correctly."
+          }
+        shell: pwsh
 
       - name: Build projects
         run: npm run build
