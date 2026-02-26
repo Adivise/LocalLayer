@@ -1,6 +1,6 @@
 {
   "name": "locallayer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Adivise",
   "description": "Overlay capturer for TikTok Live Studio (exposes localhost via embedded windows)",
   "main": "index.js",
