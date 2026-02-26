@@ -1,0 +1,400 @@
+:root {
+  --primary: #ee1d52;
+  --accent: #25f4ee;
+  --bg: #0b0b0f;
+  --card: rgba(23, 23, 28, 0.85);
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #ffffff;
+  --text-dim: #a0a0b0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ===== Body ===== */
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.glow-bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(238, 29, 82, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(37, 244, 238, 0.15) 0%, transparent 40%);
+  z-index: -1;
+}
+
+/* ===== Card ===== */
+
+.card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--card);
+  padding: 32px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.header h2 {
+  margin: 0;
+  text-align: center;
+  font-size: 24px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin: 10px 0 25px;
+}
+
+/* ===== Scroll Area ===== */
+
+#url-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 12px;
+  margin-bottom: 20px;
+  flex: 1;
+  scrollbar-gutter: stable;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.05);
+}
+
+/* Webkit */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary), var(--accent));
+  border-radius: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  transition: 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  box-shadow: 0 0 10px var(--primary);
+}
+
+/* ===== URL Row ===== */
+
+.url-row {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.input-wrapper {
+  margin-bottom: 12px;
+}
+
+/* ===== Input ===== */
+
+input[type=text],
+input[type=number] {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: white;
+  font-family: monospace;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+input[type=text]:focus,
+input[type=number]:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Remove default spinner */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  appearance: textfield;
+}
+
+/* ===== Row Controls ===== */
+
+.row-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.row-options {
+  display: flex;
+  gap: 15px;
+}
+
+.remove-btn-inline {
+  background: rgba(238, 29, 82, 0.1);
+  border: none;
+  color: var(--primary);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.remove-btn-inline:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* ===== Toggle ===== */
+
+.custom-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.custom-toggle input {
+  display: none;
+}
+
+.slider {
+  width: 30px;
+  height: 16px;
+  background: #333;
+  border-radius: 10px;
+  position: relative;
+  transition: 0.3s;
+}
+
+.slider::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: 0.3s;
+}
+
+input:checked + .slider {
+  background: var(--accent);
+}
+
+input:checked + .slider::after {
+  transform: translateX(14px);
+}
+
+.label-text {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ===== Advanced Size ===== */
+
+.advanced-options {
+  display: none;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+  gap: 20px;
+}
+
+.url-row.show-advanced .advanced-options {
+  display: flex;
+}
+
+.size-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.size-field span {
+  width: 18px;
+  text-align: right;
+  font-weight: 600;
+}
+
+/* ===== Custom Number Control ===== */
+
+.number-control {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.number-control input {
+  width: 70px;
+  text-align: center;
+  border: none;
+  background: transparent;
+}
+
+.number-control input:focus {
+  box-shadow: none;
+}
+
+.num-btn {
+  width: 28px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.num-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* ===== Buttons ===== */
+
+.actions {
+  margin-bottom: 24px;
+}
+
+.add-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--text-dim);
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.add-btn:hover {
+  border-color: white;
+  color: white;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--primary), #ff4d79);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(238, 29, 82, 0.3);
+}
+
+/* ===== Preset Bar ===== */
+
+.preset-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.preset-bar input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: white;
+}
+
+.preset-bar select {
+  flex: 1;
+  padding: 8px 36px 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  appearance: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+  position: relative;
+
+  /* Custom arrow */
+  background-image: 
+    linear-gradient(45deg, transparent 50%, var(--primary) 50%),
+    linear-gradient(135deg, var(--primary) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.preset-bar select:hover {
+  border-color: var(--primary);
+}
+
+.preset-bar select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.preset-bar select option {
+  background: #111;
+  color: white;
+}
+
+.preset-bar button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.preset-bar button:hover {
+  background: var(--primary);
+  color: white;
+}

@@ -1,0 +1,23 @@
+{
+  "name": "locallayer",
+  "version": "1.0.0",
+  "author": "Adivise",
+  "description": "Overlay capturer for TikTok Live Studio (exposes localhost via embedded windows)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "electron .",
+    "clean": "npx rimraf dist",
+    "build": "npm run clean && electron-builder",
+    "build:win": "npm run clean && electron-builder --win",
+    "build:exe": "npm run clean && electron-builder --win portable",
+    "build:mac": "npm run clean && electron-builder --mac",
+    "build:linux": "npm run clean && electron-builder --linux"
+  },
+  "keywords": [],
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "devDependencies": {
+    "electron-builder": "^24.4.0",
+    "electron": "^40.6.1"
+  }
+}

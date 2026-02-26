@@ -1,0 +1,80 @@
+appId: com.locallayer.app
+productName: 'LocalLayer'
+directories:
+  buildResources: resources
+  output: dist
+files:
+  - "**/*"
+  - "!README.md"
+  - "!LICENSE"
+asarUnpack:
+  - 'resources/**'
+asar: true
+extraResources:
+  - from: resources/icons/icon.png
+    to: icons/icon.png
+  - from: resources/icons/icon.ico
+    to: icons/icon.ico
+  - from: resources/icons/icon.icns
+    to: icons/icon.icns
+win:
+  publisherName: Adivise
+  icon: resources/icons/icon.png
+  target:
+    - nsis
+    - portable
+    - msi
+msi:
+  artifactName: locallayer-${version}.${ext}
+  createDesktopShortcut: always
+  shortcutName: ${productName}
+  oneClick: false
+  perMachine: true
+nsis:
+  artifactName: locallayer-${version}.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: uninstall
+  createDesktopShortcut: always
+  oneClick: false
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+  differentialPackage: false
+  installerIcon: resources/icons/icon.ico
+  uninstallerIcon: resources/icons/icon.ico
+  installerHeaderIcon: resources/icons/icon.ico
+  license: resources/license.txt
+portable:
+  artifactName: locallayer-${version}-portable.${ext}
+mac:
+  target:
+    - dmg
+    - pkg
+  entitlementsInherit: resources/entitlements.mac.plist
+  notarize: false
+  icon: resources/icons/icon.icns
+dmg:
+  icon: resources/icons/icon.icns
+  artifactName: locallayer-${version}.${ext}
+pkg:
+  artifactName: locallayer-${version}.${ext}
+linux:
+  target:
+    - AppImage
+    - deb
+    - rpm
+  maintainer: adivise
+  category: Utility
+  icon: resources/icons/icon.png
+appImage:
+  artifactName: locallayer-${version}.${ext}
+deb:
+  artifactName: locallayer-${version}.${ext}
+rpm:
+  artifactName: locallayer-${version}.${ext}
+npmRebuild: false
+publish:
+  provider: github
+  owner: Adivise
+  repo: LocalLayer
+  private: false
+  releaseType: release
