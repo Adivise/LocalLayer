@@ -1,4 +1,3 @@
-// renderer.js
 const { ipcRenderer } = require('electron');
 
 const form = document.getElementById('overlay-form');
@@ -10,31 +9,46 @@ const presetSelect = document.getElementById('presetSelect');
 const savePresetBtn = document.getElementById('savePreset');
 const deletePresetBtn = document.getElementById('deletePreset');
 
-function collectOptions() {
-  const rows = Array.from(document.querySelectorAll('.url-row'));
+function toIntOrZero(value) {
+  const parsed = parseInt(value, 10);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
 
-  const urls = rows.map(row => {
-    const input = row.querySelector('.fullscreenUrl');
-    const ct = row.querySelector('.row-clickthrough').checked;
-    const adv = row.querySelector('.row-advanced').checked;
-    const width = parseInt(row.querySelector('.adv-width').value, 10) || null;
-    const height = parseInt(row.querySelector('.adv-height').value, 10) || null;
+function collectOptions() {
+  const rows = document.querySelectorAll('.url-row');
+
+  const urls = Array.from(rows, row => {
+    const urlInput = row.querySelector('.fullscreenUrl');
+    const url = urlInput ? urlInput.value.trim() : '';
+    if (!url) return null;
+
+    const clickThrough = row.querySelector('.row-clickthrough')?.checked ?? false;
+    const alwaysOnTop = row.querySelector('.row-alwaysontop')?.checked ?? false;
+    const hideFromDesktop = row.querySelector('.row-hide-desktop')?.checked ?? false;
+
+    const width = toIntOrZero(row.querySelector('.adv-width')?.value);
+    const height = toIntOrZero(row.querySelector('.adv-height')?.value);
+    const x = toIntOrZero(row.querySelector('.adv-x')?.value);
+    const y = toIntOrZero(row.querySelector('.adv-y')?.value);
 
     return {
-      url: input.value.trim(),
-      clickThrough: ct,
-      advanced: adv,
+      url,
+      clickThrough,
+      alwaysOnTop,
       width,
-      height
+      height,
+      x,
+      y,
+      hideFromDesktop
     };
-  }).filter(o => o.url.length > 0);
+  }).filter(Boolean);
 
   return { urls };
 }
 
-function addUrlField() {
+function createUrlRow(data = {}) {
   const row = document.createElement('div');
-  row.className = 'url-row';
+  row.className = 'url-row show-advanced';
 
   row.innerHTML = `
     <div class="input-wrapper">
@@ -43,6 +57,7 @@ function addUrlField() {
 
     <div class="row-controls">
       <div class="row-options">
+
         <label class="custom-toggle">
           <input type="checkbox" class="row-clickthrough">
           <span class="slider"></span>
@@ -50,46 +65,90 @@ function addUrlField() {
         </label>
 
         <label class="custom-toggle">
-          <input type="checkbox" class="row-advanced">
+          <input type="checkbox" class="row-alwaysontop">
           <span class="slider"></span>
-          <span class="label-text">Advanced Size</span>
+          <span class="label-text">Always On Top</span>
         </label>
+
+        <label class="custom-toggle">
+          <input type="checkbox" class="row-hide-desktop">
+          <span class="slider"></span>
+          <span class="label-text">Hide</span>
+        </label>
+
       </div>
 
-      <button type="button" class="remove-btn-inline" title="Remove row">
-        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6"></polyline>
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        </svg>
-      </button>
+      <button type="button" class="remove-btn-inline" title="Remove row">✕</button>
     </div>
 
     <div class="advanced-options">
       <div class="size-field">
         <span>W:</span>
-        <div class="number-control">
-          <button type="button" class="num-btn minus">−</button>
-          <input type="number" class="adv-width" value="800" min="100">
-          <button type="button" class="num-btn plus">+</button>
-        </div>
+        <input type="number" class="adv-width" placeholder="0">
       </div>
 
       <div class="size-field">
         <span>H:</span>
-        <div class="number-control">
-          <button type="button" class="num-btn minus">−</button>
-          <input type="number" class="adv-height" value="600" min="100">
-          <button type="button" class="num-btn plus">+</button>
-        </div>
+        <input type="number" class="adv-height" placeholder="0">
+      </div>
+
+      <div class="size-field">
+        <span>X:</span>
+        <input type="number" class="adv-x" placeholder="0">
+      </div>
+
+      <div class="size-field">
+        <span>Y:</span>
+        <input type="number" class="adv-y" placeholder="0">
       </div>
     </div>
   `;
 
-  urlContainer.appendChild(row);
-  urlContainer.scrollTo({ top: urlContainer.scrollHeight, behavior: 'smooth' });
+  // apply initial data if provided
+  if (data.url) row.querySelector('.fullscreenUrl').value = data.url;
+  row.querySelector('.row-clickthrough').checked = !!data.clickThrough;
+  row.querySelector('.row-alwaysontop').checked = !!data.alwaysOnTop;
+  row.querySelector('.row-hide-desktop').checked = !!data.hideFromDesktop;
+  row.querySelector('.adv-width').value = data.width || 0;
+  row.querySelector('.adv-height').value = data.height || 0;
+  row.querySelector('.adv-x').value = (typeof data.x !== 'undefined') ? data.x : 0;
+  row.querySelector('.adv-y').value = (typeof data.y !== 'undefined') ? data.y : 0;
+  row.classList.add('show-advanced');
 
   bindRowEvents(row);
+  return row;
+}
+
+function addUrlField(data) {
+  const row = createUrlRow(data);
+  urlContainer.appendChild(row);
+  urlContainer.scrollTo({ top: urlContainer.scrollHeight, behavior: 'smooth' });
   row.querySelector('.fullscreenUrl').focus();
+}
+
+function bindRowEvents(row) {
+  const removeBtn = row.querySelector('.remove-btn-inline');
+  removeBtn.addEventListener('click', () => {
+    row.style.opacity = '0';
+    row.style.transform = 'scale(0.95)';
+    setTimeout(() => row.remove(), 180);
+  });
+
+  const numericSelectors = ['.adv-width', '.adv-height', '.adv-x', '.adv-y'];
+  numericSelectors.forEach(selector => {
+    const input = row.querySelector(selector);
+    if (!input) return;
+
+    if (input.value === '') {
+      input.value = '0';
+    }
+
+    input.addEventListener('blur', () => {
+      if (input.value === '') {
+        input.value = '0';
+      }
+    });
+  });
 }
 
 async function loadPresets() {
@@ -113,16 +172,13 @@ async function savePreset() {
   }
 
   const data = collectOptions();
-
   if (!data.urls.length) {
     alert('Add at least one URL before saving.');
     return;
   }
 
   await ipcRenderer.invoke('save-preset', { name, data });
-
   await loadPresets();
-
   presetSelect.value = name;
   presetNameInput.value = '';
 }
@@ -130,7 +186,6 @@ async function savePreset() {
 async function deletePreset() {
   const name = presetSelect.value;
   if (!name) return;
-
   await ipcRenderer.invoke('delete-preset', name);
   await loadPresets();
 }
@@ -141,63 +196,23 @@ presetSelect.addEventListener('change', async () => {
   if (!preset) return;
 
   urlContainer.innerHTML = '';
-  preset.urls.forEach(() => addUrlField());
-
-  const rows = document.querySelectorAll('.url-row');
-  rows.forEach((row, i) => {
-    const data = preset.urls[i];
-    row.querySelector('.fullscreenUrl').value = data.url;
-    row.querySelector('.row-clickthrough').checked = data.clickThrough;
-    row.querySelector('.row-advanced').checked = data.advanced;
-    row.querySelector('.adv-width').value = data.width || '';
-    row.querySelector('.adv-height').value = data.height || '';
-    row.classList.toggle('show-advanced', data.advanced);
-  });
+  preset.urls.forEach(urlData => addUrlField(urlData));
 });
 
 savePresetBtn.addEventListener('click', savePreset);
 deletePresetBtn.addEventListener('click', deletePreset);
-
-loadPresets();
-
-function bindRowEvents(row) {
-  const advCheckbox = row.querySelector('.row-advanced');
-  advCheckbox.addEventListener('change', () => {
-    row.classList.toggle('show-advanced', advCheckbox.checked);
-  });
-
-  const removeBtn = row.querySelector('.remove-btn-inline');
-  removeBtn.addEventListener('click', () => {
-    row.style.opacity = '0';
-    row.style.transform = 'scale(0.95)';
-    setTimeout(() => row.remove(), 200);
-  });
-
-  row.querySelectorAll('.number-control').forEach(control => {
-    const input = control.querySelector('input');
-    const minus = control.querySelector('.minus');
-    const plus = control.querySelector('.plus');
-
-    minus.addEventListener('click', () => input.stepDown());
-    plus.addEventListener('click', () => input.stepUp());
-  });
-}
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   ipcRenderer.send('create-overlay', collectOptions());
 });
 
-urlContainer.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    const inputs = urlContainer.querySelectorAll('.fullscreenUrl');
-    if (e.target === inputs[inputs.length - 1]) {
-      e.preventDefault();
-      addUrlField();
-    }
-  }
+addUrlBtn.addEventListener('click', () => addUrlField());
+
+// initialize existing starter row if present
+document.querySelectorAll('.url-row').forEach(row => {
+  row.classList.add('show-advanced');
+  bindRowEvents(row);
 });
 
-addUrlBtn.addEventListener('click', addUrlField);
-
-document.querySelectorAll('.url-row').forEach(row => bindRowEvents(row));
+loadPresets();

@@ -1,82 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>LocalLayer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LocalLayer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div class="glow-bg"></div>
-    <div class="card">
-        <div class="header">
-            <h2>Settings</h2>
-        </div>
-        <p class="subtitle">Enter URLs to create overlay windows (supports localhost)</p>
+  <div class="glow-bg"></div>
 
-        <form id="overlay-form">
-            <div id="url-container">
-                <div class="url-row">
-                    <div class="input-wrapper">
-                        <input type="text" class="fullscreenUrl" placeholder="http://localhost:24050/..." required>
-                    </div>
-
-                    <div class="row-controls">
-                        <div class="row-options">
-                            <label class="custom-toggle">
-                                <input type="checkbox" class="row-clickthrough">
-                                <span class="slider"></span>
-                                <span class="label-text">Click-through</span>
-                            </label>
-                            <label class="custom-toggle">
-                                <input type="checkbox" class="row-advanced">
-                                <span class="slider"></span>
-                                <span class="label-text">Advanced Size</span>
-                            </label>
-                        </div>
-                        <button type="button" class="remove-btn-inline" title="Remove row">
-                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5"
-                                fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path
-                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div class="advanced-options">
-                        <div class="size-field">
-                            <span>W:</span>
-                            <input type="number" class="adv-width" placeholder="px">
-                        </div>
-                        <div class="size-field">
-                            <span>H:</span>
-                            <input type="number" class="adv-height" placeholder="px">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="actions">
-                <button id="addUrl" class="add-btn" type="button">+ Add New URL</button>
-            </div>
-
-            <div class="preset-bar">
-                <input type="text" id="presetName" placeholder="Preset name">
-                <select id="presetSelect"></select>
-                <button type="button" id="savePreset">Save</button>
-                <button type="button" id="deletePreset">Delete</button>
-            </div>
-
-            <button type="submit" class="submit-btn">Create Overlays</button>
-        </form>
+  <div class="card">
+    <div class="header">
+      <h2>LocalLayer</h2>
     </div>
 
-    <script src="scripts.js"></script>
-</body>
+    <p class="subtitle">Enter URLs to create overlay windows (supports localhost)</p>
+    <p class="subtitle small">W / H = 0 opens the overlay fullscreen.</p>
+    <p class="subtitle small">X / Y = 0 opens the overlay in center.</p>
 
+    <form id="overlay-form">
+      <div id="url-container">
+        <div class="url-row show-advanced">
+          <div class="input-wrapper">
+            <input type="text" class="fullscreenUrl" placeholder="http://localhost:24050/..." required>
+          </div>
+
+          <div class="row-controls">
+            <div class="row-options">
+              <label class="custom-toggle">
+                <input type="checkbox" class="row-clickthrough">
+                <span class="slider"></span>
+                <span class="label-text">Click-through</span>
+              </label>
+
+              <label class="custom-toggle">
+                <input type="checkbox" class="row-alwaysontop">
+                <span class="slider"></span>
+                <span class="label-text">Always On Top</span>
+              </label>
+
+              <label class="custom-toggle">
+                <input type="checkbox" class="row-hide-desktop">
+                <span class="slider"></span>
+                <span class="label-text">Hide</span>
+              </label>
+            </div>
+
+            <button type="button" class="remove-btn-inline" title="Remove row">✕</button>
+          </div>
+
+          <div class="advanced-options">
+            <div class="size-field">
+              <span>W:</span>
+              <input type="number" class="adv-width" value="0">
+            </div>
+
+            <div class="size-field">
+              <span>H:</span>
+              <input type="number" class="adv-height" value="0">
+            </div>
+
+            <div class="size-field">
+              <span>X:</span>
+              <input type="number" class="adv-x" value="0">
+            </div>
+
+            <div class="size-field">
+              <span>Y:</span>
+              <input type="number" class="adv-y" value="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="addUrl" class="add-btn" type="button">+ Add New URL</button>
+      </div>
+
+      <div class="preset-bar">
+        <input type="text" id="presetName" placeholder="Preset name">
+        <select id="presetSelect"></select>
+        <button type="button" id="savePreset">Save</button>
+        <button type="button" id="deletePreset">Delete</button>
+      </div>
+
+      <button type="submit" class="submit-btn">Create Overlays</button>
+    </form>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
 </html>

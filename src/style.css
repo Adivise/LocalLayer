@@ -58,9 +58,23 @@ body {
 
 .subtitle {
   text-align: center;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--text-dim);
-  margin: 10px 0 25px;
+}
+
+/* ===== Tips (subtitle small) ===== */
+
+.subtitle.small {
+  margin: 6px auto 0;
+  max-width: 46ch;
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.62);
+  margin-bottom: 10px;
+}
+
+.subtitle.small + .subtitle.small {
+  margin-top: 2px;
 }
 
 /* ===== Scroll Area ===== */
@@ -254,43 +268,6 @@ input:checked + .slider::after {
   width: 18px;
   text-align: right;
   font-weight: 600;
-}
-
-/* ===== Custom Number Control ===== */
-
-.number-control {
-  display: flex;
-  align-items: center;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.number-control input {
-  width: 70px;
-  text-align: center;
-  border: none;
-  background: transparent;
-}
-
-.number-control input:focus {
-  box-shadow: none;
-}
-
-.num-btn {
-  width: 28px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.num-btn:hover {
-  background: var(--primary);
-  color: white;
 }
 
 /* ===== Buttons ===== */

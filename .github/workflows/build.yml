@@ -5,14 +5,20 @@ on:
     tags:
       - 'v*'
 
+concurrency:
+  group: build-release-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
     env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+      ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES: true
 
     steps:
       - name: Check out Git repository
@@ -24,50 +30,27 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Cache Electron downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/electron
+            ~/.cache/electron-builder
+            ~/Library/Caches/electron
+            ~/Library/Caches/electron-builder
+            ~\AppData\Local\electron\Cache
+            ~\AppData\Local\electron-builder\cache
+          key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json', 'electron-builder.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-electron-
 
-      - name: Debug GH_TOKEN (Linux/macOS)
-        if: matrix.os != 'windows-latest'
-        run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "GH_TOKEN is NOT set!"
-            exit 1
-          else
-            echo "GH_TOKEN is set correctly."
-          fi
-        shell: bash
+      - name: Install dependencies (fast, deterministic)
+        run: npm ci --no-audit --no-fund
 
-      - name: Debug GH_TOKEN (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          if (-not $env:GH_TOKEN) {
-            Write-Host "GH_TOKEN is NOT set!"
-            exit 1
-          } else {
-            Write-Host "GH_TOKEN is set correctly."
-          }
-        shell: pwsh
-
-      - name: Build projects
-        run: npm run build
-
-      - name: Build/Release Electron app (Linux - no snap)
+      - name: Build & publish (Linux)
         if: matrix.os == 'ubuntu-latest'
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          github_token: ${{ secrets.GH_TOKEN }}
-          release: true
-          args: --linux AppImage deb rpm --publish always
-        env:
-          ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES: true
+        run: npx electron-builder --linux AppImage deb rpm --publish always
 
-      - name: Build/Release Electron app (Windows/macOS)
+      - name: Build & publish (Windows/macOS)
         if: matrix.os != 'ubuntu-latest'
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          github_token: ${{ secrets.GH_TOKEN }}
-          release: true
-          args: --publish always
-        env:
-          ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES: true
+        run: npx electron-builder --publish always
