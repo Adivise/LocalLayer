@@ -71,12 +71,15 @@ function getVirtualBounds() {
 }
 
 function createOverlayWindow(opts) {
-  const primary = screen.getPrimaryDisplay();
-  const { width: screenWidth, height: screenHeight } = primary.workAreaSize;
+  const width = typeof opts.width === 'number' ? opts.width : 0;
+  const height = typeof opts.height === 'number' ? opts.height : 0;
+  const hasCustomSize = width > 0 && height > 0;
 
   const winOptions = {
+    title: opts.title || "Loading...",
     frame: false,
     transparent: true,
+    fullscreen: !hasCustomSize,
     alwaysOnTop: !!opts.alwaysOnTop,
     autoHideMenuBar: true,
     show: true,
@@ -86,23 +89,26 @@ function createOverlayWindow(opts) {
     }
   };
 
-  const width = typeof opts.width === 'number' ? opts.width : 0;
-  const height = typeof opts.height === 'number' ? opts.height : 0;
-  const hasCustomSize = width > 0 && height > 0;
-
   if (hasCustomSize) {
     winOptions.width = width;
     winOptions.height = height;
     winOptions.x = typeof opts.x === 'number' ? opts.x : 0;
     winOptions.y = typeof opts.y === 'number' ? opts.y : 0;
-  } else {
-    winOptions.width = screenWidth;
-    winOptions.height = screenHeight;
-    winOptions.x = 0;
-    winOptions.y = 0;
   }
 
   const win = new BrowserWindow(winOptions);
+
+  win.on('page-title-updated', (event, title) => {
+    if (configWindow && !configWindow.isDestroyed()) {
+      configWindow.webContents.send('overlays-created'); 
+    }
+  });
+
+  win.webContents.on('did-finish-load', () => {
+    if (configWindow && !configWindow.isDestroyed()) {
+      configWindow.webContents.send('overlays-created');
+    }
+  });
 
   win.loadURL(opts.url).catch(err => {
     console.error('Failed to load overlay URL:', opts.url, err);
@@ -119,7 +125,8 @@ function createOverlayWindow(opts) {
   /* ===== HIDE MODE = MOVE OFFSCREEN ONLY ===== */
   if (opts.hideFromDesktop) {
     const bounds = getVirtualBounds();
-    const offscreenX = bounds.minX - winOptions.width - 500;
+    const [w] = win.getSize();
+    const offscreenX = bounds.minX - w - 500;
     win.setPosition(offscreenX, 0);
   }
 
@@ -141,14 +148,35 @@ ipcMain.on('create-overlay', (event, options) => {
   event.sender.send('overlays-created', created);
 });
 
+ipcMain.handle('center-overlay', (event, id) => {
+  const entry = overlays.get(String(id));
+  if (!entry || entry.win.isDestroyed()) return { ok: false };
+
+  const display = screen.getPrimaryDisplay();
+  const { width: sw, height: sh } = display.workAreaSize;
+  const [w, h] = entry.win.getSize();
+
+  const cx = Math.floor(sw / 2 - w / 2);
+  const cy = Math.floor(sh / 2 - h / 2);
+
+  entry.win.setPosition(cx, cy);
+  entry.win.show();
+
+  entry.opts.hideFromDesktop = false;
+  return { ok: true, hidden: false };
+});
+
 ipcMain.handle('list-overlays', () => {
   const list = [];
   overlays.forEach((value, key) => {
-    list.push({
-      id: key,
-      url: value.opts.url,
-      hidden: value.opts.hideFromDesktop === true
-    });
+    if (!value.win.isDestroyed()) {
+      list.push({
+        id: key,
+        url: value.opts.url,
+        title: value.win.getTitle() || value.opts.url,
+        hidden: value.opts.hideFromDesktop === true
+      });
+    }
   });
   return list;
 });
@@ -159,7 +187,8 @@ ipcMain.handle('show-overlay', (event, id) => {
 
   entry.win.setPosition(0, 0);
   entry.win.show();
-  return { ok: true };
+  entry.opts.hideFromDesktop = false;
+  return { ok: true, hidden: false };
 });
 
 ipcMain.handle('hide-overlay', (event, id) => {
@@ -171,7 +200,28 @@ ipcMain.handle('hide-overlay', (event, id) => {
   const offscreenX = bounds.minX - width - 500;
 
   entry.win.setPosition(offscreenX, 0);
-  return { ok: true };
+  entry.opts.hideFromDesktop = true;
+  return { ok: true, hidden: true };
+});
+
+ipcMain.handle('toggle-overlay', (event, id) => {
+  const entry = overlays.get(String(id));
+  if (!entry || entry.win.isDestroyed()) return { ok: false };
+
+  const bounds = getVirtualBounds();
+
+  if (entry.opts.hideFromDesktop === true) {
+    entry.win.setPosition(0, 0);
+    entry.win.show();
+    entry.opts.hideFromDesktop = false;
+    return { ok: true, hidden: false };
+  } else {
+    const [width] = entry.win.getSize();
+    const offscreenX = bounds.minX - width - 500;
+    entry.win.setPosition(offscreenX, 0);
+    entry.opts.hideFromDesktop = true;
+    return { ok: true, hidden: true };
+  }
 });
 
 ipcMain.handle('destroy-overlay', (event, id) => {
